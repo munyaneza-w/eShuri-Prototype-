@@ -83,19 +83,19 @@ git clone https://github.com/munyaneza-w/eShuri-Prototype.git
 cd eShuri-Prototype
 ### 2️⃣ Install Dependencies
 ```bash
-3️⃣ Configure Environment Variables
+### 3️⃣ Configure Environment Variables
 
 Create a .env file in the root directory:
 
 
-4️⃣ Run the Development Server
+### 4️⃣ Run the Development Server
 npm run dev
 
 
 Access it in your browser at:
 👉 http://localhost:8080/
 
-☁️ Deployment
+### ☁️ Deployment
 
 Deployed App: https://e-shuri-prototype.vercel.app
 
@@ -107,9 +107,9 @@ Continuous Deployment: GitHub → Vercel (automatic builds)
 
 Planned Custom Domain: e-shuri.rw
 
-🎥 Video Demonstration
+### 🎥 Video Demonstration
 
-📽️ Watch the demo through this link: https://www.loom.com/share/68cc7591417e4dcf8abb7830b4b11906
+📽️ Watch the demo through this link: https://www.loom.com/share/4543f856f18c4479b4175fddd720353c
 
 The video demonstrates:
 
@@ -127,7 +127,7 @@ Functional Testing	Login, subject access, quizzes, and progress tracking validat
 Input Testing	Valid and invalid data handled correctly	✅ Passed
 Cross-Browser	Tested on Chrome, Edge, Safari, and Android browsers	✅ Passed
 Performance	Average load time: ~2 seconds on 10 Mbps	✅ Passed
-💡 Future Improvements
+### 💡 Future Improvements
 
 Add offline (PWA) support for rural schools.
 
@@ -137,11 +137,11 @@ Develop mobile apps (Android/iOS) for wider reach.
 
 Integrate AI-driven analytics for personalized learning feedback.
 
-📖 License
+### 📖 License
 
 Licensed under the MIT License — free to use, modify, and distribute for educational purposes.
 
-👤 Author
+### 👤 Author
 
 Wilson Munyaneza (w.munyaneza@alustudent.com)
 Bachelor of Science in Software Engineering ()
