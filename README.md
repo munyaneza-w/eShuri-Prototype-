@@ -1,153 +1,150 @@
-## 📘 E-shuri – Rwanda Digital Learning Platform
-E-shuri (Electronic Class) is a web-based learning platform designed to empower students and teachers across Rwanda with curriculum-aligned digital content. The platform provides subjects, quizzes, and progress tracking to enhance learning outcomes, accessibility, and digital literacy.
-* 🌍 “Learn, Grow, and Excel with Quality Digital Education.” 
+# 📘 **E-Shuri – Rwanda Digital Learning Platform**
 
-# 🚀 Features
-User Authentication – Secure login and account management for students and teachers.
+**E-Shuri** (“Electronic Class”) is a **web-based learning platform** designed to empower secondary school students and teachers across Rwanda with **curriculum-aligned digital content**.  
+It provides structured lessons, quizzes, and performance tracking to enhance **learning outcomes, accessibility, and digital literacy** nationwide.
 
+> 🌍 *“Learn, Grow, and Excel with Quality Digital Education.”*
 
-Subject Content Access – Browse subjects (Biology, Chemistry, Computer Science, Mathematics, etc.) with structured materials.
+---
 
+## 🚀 **Core Features**
 
-Quizzes & Assessments – Practice tests to evaluate knowledge and skills.
+- **🔐 User Authentication** – Secure login and account management for students and teachers.  
+- **📚 Subject Content Access** – Browse structured subjects (Biology, Chemistry, Computer Science, Mathematics, etc.).  
+- **🧠 Quizzes & Assessments** – Practice tests to evaluate knowledge and skills with auto-grading.  
+- **📈 Progress Tracking** – Monitor learning performance and quiz history.  
+- **📱 Responsive Design** – Works seamlessly on desktops, tablets, and mobile devices.  
+- **👩‍🏫 Teacher Tools** – Upload and organize educational content aligned with the REB curriculum.
 
+---
 
-Progress Tracking – Monitor performance and learning history.
-
-
-Responsive Design – Works seamlessly on desktops, tablets, and mobile devices.
-
-
-Teacher Tools – Upload and organize educational content.
-
-
-# 📂 Project Structure
-munyaneza-w/
-│── public/               # Static assets  
-│── src/                  # Source code (React components, pages, logic)  
-│── supabase/             # Database configuration and auth  
-│── .env                  # Environment variables  
-│── index.html            # Entry HTML file  
-│── package.json          # Dependencies and scripts  
-│── vite.config.ts        # Vite configuration  
-│── tailwind.config.ts    # Tailwind CSS config  
-│── tsconfig.json         # TypeScript configuration  
-│── README.md             # Documentation  
-
-# 🎨 Design
-The design process focused on simplicity, usability, and inclusivity.
-Wireframes & Mockups: Designed using Figma
-Link: https://www.figma.com/design/gMHuPsN8kFgjO33YootGcX/E-shuri?node-id=0-1&m=dev&t=uzBCgYGg36q2rtKQ-1
-
-Styling Framework: Tailwind CSS + custom components.
-
-UI Principles: Minimal, clean, and accessible for students aged 11–18.
+## 🗂️ **Project Structure**
+e-shuri/
+│── public/ # Static assets
+│── src/ # Source code (React components, pages, logic)
+│── supabase/ # Database configuration and authentication
+│── .env # Environment variables
+│── index.html # Entry HTML file
+│── package.json # Dependencies and scripts
+│── vite.config.ts # Vite configuration
+│── tailwind.config.ts # Tailwind CSS configuration
+│── tsconfig.json # TypeScript configuration
+│── README.md # Documentation
 
 
-# 📸 Screenshots:
-## Screenshots
+---
 
-### Home
-![Home](src/assets/Screenshots/Home.png)
+## 🎨 **Design Overview**
 
-### Home1
-![Home1](src/assets/Screenshots/Home1.png)
+- **Wireframes & Mockups:** [View in Figma](https://www.figma.com/design/gMHuPsN8kFgjO33YootGcX/E-shuri?node-id=0-1&m=dev&t=uzBCgYGg36q2rtKQ-1)  
+- **Styling Framework:** Tailwind CSS + custom UI components  
+- **UI Principles:** Minimal, accessible, and optimized for learners aged 11–18  
+- **Design Goals:** Simplicity, usability, inclusivity, and mobile responsiveness  
 
-### Sign In Page
-![Sign In Page](src/assets/Screenshots/Sign In Page.png)
+---
 
-### Teachers Dashboard Page
-![Teachers Dashboard Page](src/assets/Screenshots/Teachers Dashboard Page.png)
+## 📸 **Screenshots**
 
-### Subject Page
-![Subject Page](src/assets/Screenshots/Subject Page.png)
+### 🏠 Home Page  
+![Home Page](src/assets/Screenshots/Home.png)
 
-### Student Dashboard Page
-![Student Dashboard Page](src/assets/Screenshots/Student Dashboard Page.png)
+### 🔑 Sign-In Page  
 ![Sign In Page](src/assets/Screenshots/SignIn.png)
 
-### Teachers Dashboard Page
-![Teachers Dashboard Page](src/assets/Screenshots/TeachersDashboard.png)
+### 👩‍🏫 Teacher Dashboard  
+![Teacher Dashboard](src/assets/Screenshots/TeachersDashboard.png)
 
-### Subject Page
+### 📘 Subject Page  
 ![Subject Page](src/assets/Screenshots/Subject.png)
 
-### Student Dashboard Page
-![Student Dashboard Page](src/assets/Screenshots/StudentDashboard.png)
+### 🎓 Student Dashboard  
+![Student Dashboard](src/assets/Screenshots/StudentDashboard.png)
+
+---
+
+## ⚙️ **Technology Stack**
+
+| Layer | Tools & Frameworks |
+|-------|--------------------|
+| **Frontend** | React.js + TypeScript, Vite, Tailwind CSS |
+| **Backend & Database** | Supabase (Authentication + PostgreSQL) |
+| **Development Tools** | Visual Studio Code, Git & GitHub, Postman |
+| **Deployment** | Vercel (frontend hosting) + Supabase (database & auth) |
+
+---
+
+## 🛠️ **Setup Instructions**
+
+Follow these steps to run the project locally:
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/munyaneza-w/eShuri-Prototype.git
+cd eShuri-Prototype
+### 2️⃣ Install Dependencies
+```bash
+3️⃣ Configure Environment Variables
+
+Create a .env file in the root directory:
 
 
-
-# ⚙️ Technology Stack
-Frontend
-React.js + TypeScript
+4️⃣ Run the Development Server
+npm run dev
 
 
-Tailwind CSS (responsive UI)
+Access it in your browser at:
+👉 http://localhost:8080/
 
+☁️ Deployment
 
-Vite (fast build tool)
+Deployed App: https://e-shuri-prototype.vercel.app
 
+Hosting: Vercel (Frontend)
 
-Backend & Database
-Node.js + Express.js (API server)
+Database & Auth: Supabase (PostgreSQL)
 
+Continuous Deployment: GitHub → Vercel (automatic builds)
 
-Supabase (Authentication + PostgreSQL Database)
+Planned Custom Domain: e-shuri.rw
 
+🎥 Video Demonstration
 
-# Development Tools
-Visual Studio Code
+📽️ Watch the demo through this link: https://www.loom.com/share/68cc7591417e4dcf8abb7830b4b11906
 
+The video demonstrates:
 
-Git & GitHub
+Student & teacher dashboards
 
+Lesson browsing
 
-Postman (API testing)
+Quizzes and progress tracking
 
+Responsive design on multiple devices
 
-# Deployment
-Azure (web hosting and database)
+### 📊 Testing Summary
+Type	Description	Result
+Functional Testing	Login, subject access, quizzes, and progress tracking validated	✅ Passed
+Input Testing	Valid and invalid data handled correctly	✅ Passed
+Cross-Browser	Tested on Chrome, Edge, Safari, and Android browsers	✅ Passed
+Performance	Average load time: ~2 seconds on 10 Mbps	✅ Passed
+💡 Future Improvements
 
+Add offline (PWA) support for rural schools.
 
-# 🛠️ Setup Instructions
-Follow these steps to set up and run the project locally:
-* Clone the repository
+Extend to all REB subjects (S1–S6).
 
- git clone https://github.com/munyaneza-w/E-shuri.git
-Install dependencies
+Develop mobile apps (Android/iOS) for wider reach.
 
- npm install
-Configure environment variables
+Integrate AI-driven analytics for personalized learning feedback.
 
+📖 License
 
-# Create a .env file in the root directory
+Licensed under the MIT License — free to use, modify, and distribute for educational purposes.
 
+👤 Author
 
-Run the project
+Wilson Munyaneza (w.munyaneza@alustudent.com)
+Bachelor of Science in Software Engineering ()
+Supervisor: Mr. Simeon Nsengiyumva
 
- npm run dev
-
-
-# Access the app
- Open http://localhost:5800/ in your browser.
-
-
-
-# ☁️ Deployment Plan
-Cloud Hosting: Microsoft Azure
-
-
-Database Hosting: Supabase PostgreSQL
-
-
-Continuous Deployment: GitHub → Azure pipeline for automatic builds
-
-
-* Domain: e-shuri.rw (planned)
-
-
-# 🎥 Video Demo
-📌 Here is the video link: https://drive.google.com/drive/folders/1WoHFKp3-gKm2w65di0vTfsx0kGqWrGJ6?usp=sharing 
-# 📖 License
-This project is licensed under the MIT License – free to use, modify, and distribute.
 
