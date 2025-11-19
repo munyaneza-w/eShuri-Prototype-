@@ -1,262 +1,154 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { ArrowLeft, TrendingUp, Users, Award } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
-interface QuizAttempt {
-  id: string;
-  score: number;
-  max_score: number;
-  completed_at: string;
-  student_id: string;
-  quiz: {
-    title: string;
-  };
-  profiles: {
-    full_name: string;
-  };
-}
-
-interface Student {
-  id: string;
+interface StudentStats {
   full_name: string;
+  totalSubjects: number;
+  totalQuizzes: number;
+  totalHours: number;
+  progress: number;
 }
 
-const StudentPerformance = () => {
-  const navigate = useNavigate();
-  const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
-  const [allAttempts, setAllAttempts] = useState<QuizAttempt[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<string>("all");
+export default function StudentDashboard() {
+  const [stats, setStats] = useState<StudentStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalAttempts: 0,
-    averageScore: 0,
-    uniqueStudents: 0,
-  });
 
   useEffect(() => {
-    checkAuth();
-    fetchPerformanceData();
+    fetchStudentPerformance();
+
+    // Real-time updates
+    const quizChannel = supabase
+      .channel("quiz-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "quiz_attempts" },
+        () => fetchStudentPerformance()
+      )
+      .subscribe();
+
+    const courseChannel = supabase
+      .channel("course-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "student_courses" },
+        () => fetchStudentPerformance()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(quizChannel);
+      supabase.removeChannel(courseChannel);
+    };
   }, []);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    }
-  };
-
-  const fetchPerformanceData = async () => {
-    const { data, error } = await supabase
-      .from("quiz_attempts")
-      .select(`
-        id,
-        score,
-        max_score,
-        completed_at,
-        student_id,
-        quiz:quizzes(title),
-        profiles:student_id(full_name)
-      `)
-      .not("completed_at", "is", null)
-      .order("completed_at", { ascending: false });
-
-    if (error) {
-      toast.error("Failed to load performance data");
-      setLoading(false);
-      return;
-    }
-
-    const typedData = data as unknown as QuizAttempt[];
-    setAllAttempts(typedData);
-    setAttempts(typedData);
-
-    // Get unique students
-    const uniqueStudentMap = new Map<string, string>();
-    typedData.forEach((attempt) => {
-      if (!uniqueStudentMap.has(attempt.student_id)) {
-        uniqueStudentMap.set(attempt.student_id, attempt.profiles.full_name);
+  const fetchStudentPerformance = async () => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
+      if (!session) {
+        toast.error("Please log in to continue");
+        return;
       }
-    });
-    const studentList = Array.from(uniqueStudentMap.entries()).map(([id, full_name]) => ({
-      id,
-      full_name,
-    }));
-    setStudents(studentList);
 
-    // Calculate stats
-    calculateStats(typedData);
-    setLoading(false);
-  };
+      const studentId = session.user.id;
 
-  const calculateStats = (data: QuizAttempt[]) => {
-    const totalAttempts = data.length;
-    const averageScore =
-      data.reduce((sum, attempt) => sum + (attempt.score / attempt.max_score) * 100, 0) /
-      (totalAttempts || 1);
-    const uniqueStudents = new Set(data.map((a) => a.student_id)).size;
+      // 1. Fetch student name
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", studentId)
+        .single();
+      if (profileError) throw profileError;
 
-    setStats({ totalAttempts, averageScore, uniqueStudents });
-  };
+      // 2. Fetch enrolled courses
+      const { data: courses, error: courseError } = await supabase
+        .from("student_courses")
+        .select("progress")
+        .eq("student_id", studentId);
+      if (courseError) throw courseError;
 
-  const handleStudentFilter = (studentId: string) => {
-    setSelectedStudent(studentId);
-    if (studentId === "all") {
-      setAttempts(allAttempts);
-      calculateStats(allAttempts);
-    } else {
-      const filtered = allAttempts.filter((attempt) => attempt.student_id === studentId);
-      setAttempts(filtered);
-      calculateStats(filtered);
+      // 3. Fetch completed quiz attempts
+      const { data: quizzes, error: quizError } = await supabase
+        .from("quiz_attempts")
+        .select("id, completed_at, duration")
+        .eq("student_id", studentId)
+        .not("completed_at", "is", null);
+      if (quizError) throw quizError;
+
+      // Calculate metrics
+      const totalSubjects = courses?.length || 0;
+      const totalQuizzes = quizzes?.length || 0;
+      const avgProgress =
+        courses?.reduce((sum, c) => sum + (c.progress || 0), 0) /
+          (courses?.length || 1) || 0;
+      const totalHours =
+        quizzes?.reduce((sum, q) => sum + (q.duration || 0), 0) / 60 || 0;
+
+      setStats({
+        full_name: profile?.full_name || "Student",
+        totalSubjects,
+        totalQuizzes,
+        totalHours: parseFloat(totalHours.toFixed(1)),
+        progress: parseFloat(avgProgress.toFixed(1)),
+      });
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+      toast.error("Failed to load performance data");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading || !stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-accent to-background">
-        <div className="container mx-auto p-6 max-w-7xl">
-          <Skeleton className="h-10 w-48 mb-6" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-          <Skeleton className="h-96" />
-        </div>
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-purple-600 via-orange-400 to-yellow-300">
+        <Skeleton className="h-32 w-96" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-background">
-      <div className="container mx-auto p-6 max-w-7xl">
-        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
-        <h1 className="text-4xl font-bold mb-8">Student Performance Analytics</h1>
-
-        <div className="mb-6">
-          <Label>Filter by Student</Label>
-          <Select value={selectedStudent} onValueChange={handleStudentFilter}>
-            <SelectTrigger className="w-full md:w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Students</SelectItem>
-              {students.map((student) => (
-                <SelectItem key={student.id} value={student.id}>
-                  {student.full_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-orange-400 to-yellow-300 text-white p-8">
+      <div className="max-w-4xl mx-auto text-center">
+        <div className="inline-block bg-white/20 px-4 py-1 rounded-full mb-6 text-sm font-medium">
+          Student Dashboard
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Average Score
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-primary">
-                {stats.averageScore.toFixed(1)}%
-              </p>
-            </CardContent>
-          </Card>
+        <h1 className="text-5xl font-bold mb-2">
+          Welcome back, {stats.full_name}!
+        </h1>
+        <p className="text-lg mb-10">
+          Continue your learning journey with Rwanda's best educational platform.
+        </p>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-secondary" />
-                Active Students
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-secondary">{stats.uniqueStudents}</p>
-            </CardContent>
-          </Card>
+        {/* Stats section */}
+        <div className="bg-white/20 rounded-2xl p-6 backdrop-blur-md">
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-lg font-semibold">Overall Progress</p>
+            <p className="text-lg font-semibold">{stats.progress}%</p>
+          </div>
+          <Progress value={stats.progress} className="h-3 mb-6" />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-accent-foreground" />
-                Total Attempts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-accent-foreground">{stats.totalAttempts}</p>
-            </CardContent>
-          </Card>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 text-center">
+            <div>
+              <p className="text-4xl font-bold">{stats.totalSubjects}</p>
+              <p className="text-sm">Subjects</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold">{stats.totalQuizzes}</p>
+              <p className="text-sm">Quizzes</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold">{stats.totalHours}</p>
+              <p className="text-sm">Hours</p>
+            </div>
+          </div>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Quiz Attempts</CardTitle>
-            <CardDescription>View detailed student performance on quizzes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {attempts.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No quiz attempts yet. Students will appear here after taking quizzes.
-              </p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Quiz</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Percentage</TableHead>
-                    <TableHead>Completed</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {attempts.map((attempt) => (
-                    <TableRow key={attempt.id}>
-                      <TableCell className="font-medium">{attempt.profiles.full_name}</TableCell>
-                      <TableCell>{attempt.quiz.title}</TableCell>
-                      <TableCell>
-                        {attempt.score} / {attempt.max_score}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`font-semibold ${
-                            (attempt.score / attempt.max_score) * 100 >= 70
-                              ? "text-green-600"
-                              : (attempt.score / attempt.max_score) * 100 >= 50
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {((attempt.score / attempt.max_score) * 100).toFixed(1)}%
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(attempt.completed_at).toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
-};
-
-export default StudentPerformance;
+}
